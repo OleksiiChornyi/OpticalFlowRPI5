@@ -1,37 +1,22 @@
 #!/bin/bash
 set -e
-echo "===================="
-echo "1. Установка ROS2 Jazzy"
-echo "===================="
+echo "=== Установка ROS2 Humble ==="
 
-# Проверка локали
-sudo apt update && sudo apt install -y locales software-properties-common curl
+sudo apt update
+sudo apt install -y locales
 sudo locale-gen en_US en_US.UTF-8
 sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
-
-# Добавление репозитория ROS2
-if [ ! -f /usr/share/keyrings/ros-archive-keyring.gpg ]; then
-    sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-fi
-
-if [ ! -f /etc/apt/sources.list.d/ros2.list ]; then
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-fi
-
+sudo apt install -y software-properties-common
+sudo add-apt-repository universe
 sudo apt update
-sudo apt install -y ros-jazzy-ros-base python3-rosdep python3-colcon-common-extensions
-
-# Инициализация rosdep (только если не делалась)
-if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
-    sudo rosdep init || true
-fi
+sudo apt install -y curl
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y ros-humble-ros-base python3-rosdep python3-colcon-common-extensions python3-pip python3-argcomplete
+source /opt/ros/humble/setup.bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+sudo rosdep init || true
 rosdep update
-
-# Автоподключение ROS2
-if ! grep -q "/opt/ros/jazzy/setup.bash" ~/.bashrc; then
-    echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-fi
-source /opt/ros/jazzy/setup.bash
-
-echo "ROS2 Jazzy установлен!"

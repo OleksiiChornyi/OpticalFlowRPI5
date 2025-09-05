@@ -1,44 +1,53 @@
 #!/bin/bash
 set -e
-echo "===================="
-echo "5. Создание скриптов запуска"
-echo "===================="
+echo "=== Создание скриптов запуска ==="
 
-mkdir -p ~/autorun
+mkdir -p ~/rpi_ws/src/optical_flow_pkg
 
-# 5.1 MAVROS
-cat > ~/autorun/start_mavros.sh << 'EOF'
+# 1. Запуск камеры
+cat > ~/rpi_ws/src/optical_flow_pkg/run_camera.sh << 'EOF'
 #!/bin/bash
-while [ ! -e /dev/ttyACM0 ]; do
-    echo "/dev/ttyACM0 не найден, ждем..."
-    sleep 2
-done
-echo "Запускаем MAVROS..."
-ros2 launch mavros apm.launch fcu_url:=/dev/ttyACM0:921600 fcu_protocol:="v2.0"
-ros2 service call /mavros/set_stream_rate mavros_msgs/srv/StreamRate "{stream_id: 0, message_rate: 10, on_off: true}"
+source /opt/ros/humble/setup.bash
+ros2 run camera_ros camera_node --ros-args -p camera:=0 -p width:=1152 -p height:=864
 EOF
-chmod +x ~/autorun/start_mavros.sh
+chmod +x ~/rpi_ws/src/optical_flow_pkg/run_camera.sh
 
-# 5.2 Optical flow
-cat > ~/autorun/start_optical_flow.sh << 'EOF'
+# 2. Запуск MAVROS
+cat > ~/rpi_ws/src/optical_flow_pkg/run_mavros.sh << 'EOF'
 #!/bin/bash
-source /opt/ros/jazzy/setup.bash
-ros2 run optical_flow optical_flow
+source /opt/ros/humble/setup.bash
+ros2 launch mavros mavros.launch.py
 EOF
-chmod +x ~/autorun/start_optical_flow.sh
+chmod +x ~/rpi_ws/src/optical_flow_pkg/run_mavros.sh
 
-# 5.3 TMUX запуск всех
-cat > ~/autorun/start_all_tmux.sh << 'EOF'
+# 3. Установка стримрейта MAVROS
+cat > ~/rpi_ws/src/optical_flow_pkg/set_mavros_stream.sh << 'EOF'
 #!/bin/bash
-SESSION="optical_flow_session"
-if tmux has-session -t $SESSION 2>/dev/null; then
-    tmux kill-session -t $SESSION
-fi
+source /opt/ros/humble/setup.bash
+ros2 topic pub /mavros/set_stream mavros_msgs/msg/StreamRate "{stream_id: 0, message_rate: 50, on_off: true}"
+EOF
+chmod +x ~/rpi_ws/src/optical_flow_pkg/set_mavros_stream.sh
+
+# 4. Запуск optical_flow.py
+cat > ~/rpi_ws/src/optical_flow_pkg/run_optical_flow.sh << 'EOF'
+#!/bin/bash
+source /opt/ros/humble/setup.bash
+ros2 run optical_flow_pkg optical_flow.py
+EOF
+chmod +x ~/rpi_ws/src/optical_flow_pkg/run_optical_flow.sh
+
+# 5. Скрипт для запуска всех в tmux
+cat > ~/rpi_ws/src/optical_flow_pkg/run_all_tmux.sh << 'EOF'
+#!/bin/bash
+SESSION="pilot"
 tmux new-session -d -s $SESSION
-tmux send-keys -t $SESSION "bash ~/autorun/start_mavros.sh" C-m
+tmux send-keys -t $SESSION "bash ~/rpi_ws/src/optical_flow_pkg/run_camera.sh" C-m
 tmux split-window -v -t $SESSION
-tmux send-keys -t $SESSION "bash ~/autorun/start_optical_flow.sh" C-m
+tmux send-keys -t $SESSION "bash ~/rpi_ws/src/optical_flow_pkg/run_mavros.sh" C-m
+tmux split-window -h -t $SESSION
+tmux send-keys -t $SESSION "bash ~/rpi_ws/src/optical_flow_pkg/run_optical_flow.sh" C-m
+tmux attach -t $SESSION
 EOF
-chmod +x ~/autorun/start_all_tmux.sh
+chmod +x ~/rpi_ws/src/optical_flow_pkg/run_all_tmux.sh
 
-echo "Скрипты запуска созданы!"
+echo "=== Скрипты запуска созданы ==="
