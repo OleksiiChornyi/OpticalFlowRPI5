@@ -1,6 +1,9 @@
 #!/bin/bash
-chmod +x ./OpticalFlowRPI5/installer/install_ros2_mavros.sh 
-./OpticalFlowRPI5/installer/install_ros2_mavros.sh 
+chmod +x ./OpticalFlowRPI5/installer/install_ros2.sh 
+./OpticalFlowRPI5/installer/install_ros2.sh 
+
+chmod +x ./OpticalFlowRPI5/installer/install_mavros.sh 
+./OpticalFlowRPI5/installer/install_mavros.sh 
 
 chmod +x ./OpticalFlowRPI5/installer/install_camera_deps.sh 
 ./OpticalFlowRPI5/installer/install_camera_deps.sh 
