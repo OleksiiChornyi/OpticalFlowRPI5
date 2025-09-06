@@ -2,8 +2,12 @@
 set -e
 echo "=== Создание optical_flow.py ==="
 
-mkdir -p ~/rpi_ws/src/optical_flow_pkg
-cat > ~/rpi_ws/src/optical_flow_pkg/optical_flow.py << 'EOF'
+
+if [ ! -f ~/optical_flow.py ]; then
+    cat > ~/optical_flow.py << 'EOF'
 #вставьте код сюда
 EOF
-echo "optical_flow.py создан."
+    echo "optical_flow.py создан."
+else
+    echo "optical_flow.py уже существует."
+fi

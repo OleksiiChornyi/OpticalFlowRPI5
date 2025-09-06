@@ -8,6 +8,9 @@ chmod +x ./OpticalFlowRPI5/installer/install_mavros.sh
 chmod +x ./OpticalFlowRPI5/installer/install_camera_deps.sh 
 ./OpticalFlowRPI5/installer/install_camera_deps.sh 
 
+chmod +x ./OpticalFlowRPI5/installer/install_opencv.sh 
+./OpticalFlowRPI5/installer/install_opencv.sh 
+
 chmod +x ./OpticalFlowRPI5/installer/create_optical_flow.py.sh 
 ./OpticalFlowRPI5/installer/create_optical_flow.py.sh 
 

@@ -1,22 +1,21 @@
-#!/bin/bash
-set -e
-echo "=== Установка ROS2 Humble ==="
-
-sudo apt update
-sudo apt install -y locales
+# Install ROS2
+sudo apt update && sudo apt install locales
 sudo locale-gen en_US en_US.UTF-8
 sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
+
 sudo apt install -y software-properties-common
 sudo add-apt-repository universe
-sudo apt update
-sudo apt install -y curl
+
+sudo apt update && sudo apt install -y curl
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 sudo apt update
-sudo apt upgrade -y
-sudo apt install -y ros-humble-ros-base python3-rosdep python3-colcon-common-extensions python3-pip python3-argcomplete
-source /opt/ros/humble/setup.bash
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-sudo rosdep init || true
-rosdep update
+sudo apt upgrade
+sudo apt install -y ros-jazzy-ros-base
+source /opt/ros/jazzy/setup.bash
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+
+sudo apt install -y python3-rosdep 
+sudo rosdep init

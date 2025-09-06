@@ -4,7 +4,7 @@ echo "=== Создание скриптов запуска ==="
 
 mkdir -p ~/rpi_ws/src/optical_flow_pkg
 
-# 1. Запуск камеры
+# run_camera.sh
 cat > ~/rpi_ws/src/optical_flow_pkg/run_camera.sh << 'EOF'
 #!/bin/bash
 source /opt/ros/humble/setup.bash
@@ -12,7 +12,7 @@ ros2 run camera_ros camera_node --ros-args -p camera:=0 -p width:=1152 -p height
 EOF
 chmod +x ~/rpi_ws/src/optical_flow_pkg/run_camera.sh
 
-# 2. Запуск MAVROS
+# run_mavros.sh
 cat > ~/rpi_ws/src/optical_flow_pkg/run_mavros.sh << 'EOF'
 #!/bin/bash
 source /opt/ros/humble/setup.bash
@@ -20,7 +20,7 @@ ros2 launch mavros mavros.launch.py
 EOF
 chmod +x ~/rpi_ws/src/optical_flow_pkg/run_mavros.sh
 
-# 3. Установка стримрейта MAVROS
+# set_mavros_stream.sh
 cat > ~/rpi_ws/src/optical_flow_pkg/set_mavros_stream.sh << 'EOF'
 #!/bin/bash
 source /opt/ros/humble/setup.bash
@@ -28,7 +28,7 @@ ros2 topic pub /mavros/set_stream mavros_msgs/msg/StreamRate "{stream_id: 0, mes
 EOF
 chmod +x ~/rpi_ws/src/optical_flow_pkg/set_mavros_stream.sh
 
-# 4. Запуск optical_flow.py
+# run_optical_flow.sh
 cat > ~/rpi_ws/src/optical_flow_pkg/run_optical_flow.sh << 'EOF'
 #!/bin/bash
 source /opt/ros/humble/setup.bash
@@ -36,10 +36,16 @@ ros2 run optical_flow_pkg optical_flow.py
 EOF
 chmod +x ~/rpi_ws/src/optical_flow_pkg/run_optical_flow.sh
 
-# 5. Скрипт для запуска всех в tmux
+# run_all_tmux.sh
 cat > ~/rpi_ws/src/optical_flow_pkg/run_all_tmux.sh << 'EOF'
 #!/bin/bash
 SESSION="pilot"
+if tmux has-session -t $SESSION 2>/dev/null; then
+    echo "TMUX session $SESSION уже существует. Присоединяемся..."
+    tmux attach -t $SESSION
+    exit 0
+fi
+
 tmux new-session -d -s $SESSION
 tmux send-keys -t $SESSION "bash ~/rpi_ws/src/optical_flow_pkg/run_camera.sh" C-m
 tmux split-window -v -t $SESSION
@@ -50,4 +56,4 @@ tmux attach -t $SESSION
 EOF
 chmod +x ~/rpi_ws/src/optical_flow_pkg/run_all_tmux.sh
 
-echo "=== Скрипты запуска созданы ==="
+echo "Скрипты запуска созданы."
